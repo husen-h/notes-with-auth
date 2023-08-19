@@ -1,13 +1,16 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import bcrypt from "bcryptjs";
 import { type GetServerSidePropsContext } from "next";
 import {
   getServerSession,
-  type NextAuthOptions,
   type DefaultSession,
+  type NextAuthOptions,
 } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
 import DiscordProvider from "next-auth/providers/discord";
 import { env } from "~/env.mjs";
 import { prisma } from "~/server/db";
+import { registrationFormSchema } from "~/types/registration";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -37,19 +40,52 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: ({ session, token }) => {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id,
+          email: token.email,
+        },
+      };
+    },
+    jwt: ({ token, account, user }) => {
+      if (account) {
+        token.accessToken = account.access_token;
+        token.email = user.email;
+        token.id = user.id;
+        console.log({ user }, "from JWT callback");
+      }
+      return token;
+    },
   },
   adapter: PrismaAdapter(prisma),
+  secret: env.JWT_SECRET,
   providers: [
-    DiscordProvider({
-      clientId: env.DISCORD_CLIENT_ID,
-      clientSecret: env.DISCORD_CLIENT_SECRET,
+    // DiscordProvider({
+    //   clientId: env.DISCORD_CLIENT_ID,
+    //   clientSecret: env.DISCORD_CLIENT_SECRET,
+    // }),
+    CredentialsProvider({
+      credentials: {
+        email: { type: "text" },
+        password: { type: "password" },
+      },
+      authorize: async (credentials, req) => {
+        const { email, password } = registrationFormSchema.parse(credentials);
+        const user = await prisma.user.findUnique({
+          where: {
+            email,
+          },
+        });
+
+        if (!user?.password) return null;
+        const passwordIsValid = await bcrypt.compare(password, user.password);
+        if (!passwordIsValid) return null;
+        console.log("hello from authorize", user);
+        return user;
+      },
     }),
     /**
      * ...add more providers here.
@@ -61,6 +97,9 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+  session: {
+    strategy: "jwt",
+  },
 };
 
 /**
