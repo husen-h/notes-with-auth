@@ -23,6 +23,8 @@ import { api } from "~/utils/api";
 export default function Home() {
   const { data: sessionData, status } = useSession();
 
+  console.log(sessionData?.user.email);
+
   return (
     <>
       <main className="flex min-h-screen flex-col items-center justify-start gap-8">
@@ -32,8 +34,15 @@ export default function Home() {
             Taking
           </span>
         </h1>
-        {sessionData?.user.email && <h2>LOGGED IN!</h2>}
-        <AuthorizationCard />
+        {status === "unauthenticated" && <AuthorizationCard />}
+        {status === "authenticated" && (
+          <button
+            className="border border-slate-900 px-4 py-2 hover:bg-slate-600 hover:text-slate-100"
+            onClick={() => signOut()}
+          >
+            Sign out
+          </button>
+        )}
       </main>
     </>
   );
