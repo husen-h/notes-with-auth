@@ -13,6 +13,28 @@ export const notesRouter = createTRPCRouter({
 
     return notesByUser;
   }),
+  getNoteById: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const note = await ctx.prisma.note.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
+
+      if (!note) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Note not found",
+        });
+      }
+
+      return note;
+    }),
   createNote: protectedProcedure
     .input(
       z.object({
