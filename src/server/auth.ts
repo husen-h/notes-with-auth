@@ -1,4 +1,5 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
 import { type GetServerSidePropsContext } from "next";
 import {
@@ -61,6 +62,10 @@ export const authOptions: NextAuthOptions = {
     },
   },
   adapter: PrismaAdapter(prisma),
+  pages: {
+    signIn: "/auth/login/",
+    error: "/auth/login/",
+  },
   secret: env.JWT_SECRET,
   providers: [
     // DiscordProvider({
@@ -82,7 +87,11 @@ export const authOptions: NextAuthOptions = {
 
         if (!user?.password) return null;
         const passwordIsValid = await bcrypt.compare(password, user.password);
-        if (!passwordIsValid) return null;
+        if (!passwordIsValid)
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid password",
+          });
         console.log("hello from authorize", user);
         return user;
       },

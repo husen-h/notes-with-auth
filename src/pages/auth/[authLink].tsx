@@ -3,7 +3,12 @@ import classNames from "classnames";
 import { type GetStaticProps, type InferGetStaticPropsType } from "next";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { type HTMLInputTypeAttribute, type ReactNode } from "react";
+import { useRouter } from "next/router";
+import {
+  type PropsWithChildren,
+  type HTMLInputTypeAttribute,
+  type ReactNode,
+} from "react";
 import {
   useForm,
   type FieldErrors,
@@ -12,11 +17,14 @@ import {
 } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { z } from "zod";
+import { LayoutWithTitle } from "~/components/layoutWithTitle";
+import { LinkButton } from "~/components/linkButton";
 import {
   registrationFormSchema,
   type RegistrationFormDataType,
 } from "~/types/registration";
 import { api } from "~/utils/api";
+import { HiArrowLongLeft, HiArrowLongRight } from "react-icons/hi2";
 
 const querySchema = z.union([z.literal("login"), z.literal("register")]);
 type QuerySchemaType = z.infer<typeof querySchema>;
@@ -26,19 +34,27 @@ export default function Auth(
 ) {
   const { authLink } = props;
   return (
-    <div className="h-96 w-[500px] border-[1px] border-slate-300 bg-white">
-      <div className="flex items-center">
-        <AuthorizationTab active={authLink === "register"} tab="register">
-          Register
-        </AuthorizationTab>
-        <AuthorizationTab active={authLink === "login"} tab="login">
-          Login
-        </AuthorizationTab>
+    <LayoutWithTitle title="Introduce yourself">
+      <div className="flex items-start gap-8">
+        {/* <LinkButton href="/">
+        <HiArrowLongLeft size={24} />
+        Go back
+      </LinkButton> */}
+        <div className="w-[500px] border-[1px] border-slate-300 bg-white">
+          <div className="flex items-center">
+            <AuthorizationTab active={authLink === "register"} tab="register">
+              Register
+            </AuthorizationTab>
+            <AuthorizationTab active={authLink === "login"} tab="login">
+              Login
+            </AuthorizationTab>
+          </div>
+          <div className="p-5">
+            {authLink === "register" ? <Register /> : <Login />}
+          </div>
+        </div>
       </div>
-      <div className="p-5">
-        {authLink === "register" ? <Register /> : "Login"}
-      </div>
-    </div>
+    </LayoutWithTitle>
   );
 }
 
@@ -80,7 +96,7 @@ function AuthorizationTab({
   tab: QuerySchemaType;
 }) {
   const styles = classNames(
-    "grow cursor-pointer flex justify-center p-3 basis-0",
+    "grow cursor-pointer flex justify-center p-3 basis-0 font-bold",
     {
       "bg-gray-300 text-gray-400": !active,
       "bg-rose-600 text-white": active,
@@ -142,12 +158,70 @@ function Register() {
             type="password"
             errors={errors}
           />
-          <button
+          <LinkButton type="submit">Submit</LinkButton>
+          {/* <button
             type="submit"
             className="w-full rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 sm:w-auto"
           >
             Submit
-          </button>
+          </button> */}
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function Login() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegistrationFormDataType>({
+    resolver: zodResolver(registrationFormSchema),
+  });
+
+  const { query } = useRouter();
+  const loginError = query.error as string;
+  //   const fullErrors: FieldErrors<RegistrationFormDataType> = {
+  //     ...errors,
+  //     password: {
+  //       ...errors.password,
+  //       message: errors.password?.message || loginError,
+  //     },
+  //   };
+
+  const onSubmit: SubmitHandler<RegistrationFormDataType> = async (data) =>
+    await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      callbackUrl: "/notes",
+    });
+
+  const formStyles = classNames({
+    "opacity-50": false,
+  });
+
+  return (
+    <div>
+      <form noValidate onSubmit={handleSubmit(onSubmit)} className={formStyles}>
+        <div className="mb-6 flex flex-col items-start gap-6">
+          <InputWithLabel
+            name="email"
+            placeholder="someone@something.com"
+            register={register}
+            label="Email"
+            type="text"
+            errors={errors}
+          />
+          <InputWithLabel
+            name="password"
+            placeholder="•••••••••"
+            register={register}
+            label="Password"
+            type="password"
+            errors={errors}
+          />
+          <LinkButton type="submit">Login</LinkButton>
         </div>
       </form>
     </div>
@@ -187,9 +261,11 @@ function InputWithLabel({
         required={required}
         {...register(name)}
       />
-      {Boolean(errorMessage) && (
-        <p className="text-xs text-red-500">{errorMessage}</p>
-      )}
+      {Boolean(errorMessage) && <ErrorText message={errorMessage} />}
     </div>
   );
+}
+
+function ErrorText(props: { message?: string }) {
+  return <p className="text-xs text-red-500">{props.message}</p>;
 }
