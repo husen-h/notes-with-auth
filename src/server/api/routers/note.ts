@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
-export const notesRouter = createTRPCRouter({
+export const noteRouter = createTRPCRouter({
   getNotes: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id;
     const notesByUser = await ctx.prisma.note.findMany({

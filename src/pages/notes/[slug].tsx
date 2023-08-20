@@ -11,12 +11,36 @@ import { appRouter } from "~/server/api/root";
 import { authOptions } from "~/server/auth";
 import { prisma } from "~/server/db";
 import { NotesLayout } from "./(layout)";
+import { api } from "~/utils/api";
+import { GradientTitle } from "~/components/layoutWithTitle";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 export default function NoteSlug(
   props: InferGetServerSidePropsType<typeof getServerSideProps>
 ) {
   const { slug } = props;
-  return <div>{slug}</div>;
+  const { data: note, isLoading } = api.note.getNoteById.useQuery({
+    id: slug,
+  });
+
+  if (isLoading) return <p>Loading...</p>;
+  if (!note) return <p>404</p>;
+  return (
+    <div className="flex h-full grow flex-col gap-4 p-4">
+      <div className="flex items-center justify-between">
+        <GradientTitle title={note.title} size="sm" />
+        <span className="text-sm text-gray-500">
+          created {dayjs(note.createdAt).fromNow()}
+        </span>
+      </div>
+      <div className="grow bg-white p-4">
+        <p>{note.content}</p>
+      </div>
+    </div>
+  );
 }
 
 export const getServerSideProps: GetServerSideProps<{ slug: string }> = async (
@@ -37,7 +61,7 @@ export const getServerSideProps: GetServerSideProps<{ slug: string }> = async (
       prisma,
       session: null,
     },
-    transformer: SuperJSON, // optional - adds superjson serialization
+    transformer: SuperJSON,
   });
 
   const slug = context.params?.slug;
@@ -45,7 +69,7 @@ export const getServerSideProps: GetServerSideProps<{ slug: string }> = async (
     throw new TRPCError({ code: "BAD_REQUEST" });
   }
 
-  await helpers.notes.getNoteById.prefetch({ id: slug });
+  await helpers.note.getNoteById.prefetch({ id: slug });
 
   return {
     props: {
