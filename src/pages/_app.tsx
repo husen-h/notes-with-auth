@@ -11,6 +11,7 @@ import {
 } from "next/app";
 import type { NextComponentType } from "next";
 import { type PropsWithChildren, type ReactNode } from "react";
+import { LayoutWithTitle } from "~/components/layoutWithTitle";
 
 const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ({
   Component,
@@ -21,24 +22,14 @@ const MyApp: NextComponentType<AppContext, AppInitialProps, AppLayoutProps> = ({
 
   return (
     <SessionProvider session={session}>
-      <Layout>
-        {getLayout(
-          <>
-            <Toaster position="top-right" />
-            <Component {...pageProps} />
-          </>
-        )}
-      </Layout>
+      {getLayout(
+        <>
+          <Toaster position="top-right" />
+          <Component {...pageProps} />
+        </>
+      )}
     </SessionProvider>
   );
 };
 
 export default api.withTRPC(MyApp);
-
-function Layout({ children }: PropsWithChildren) {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-start gap-8">
-      {children}
-    </main>
-  );
-}
