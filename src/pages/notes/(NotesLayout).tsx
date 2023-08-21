@@ -92,7 +92,9 @@ function Header() {
   return (
     <nav className="grid shrink-0 grow-0 basis-20 grid-cols-3 items-center bg-white">
       <div className="col-start-2 justify-self-center">
-        <GradientTitle title="Notes-taking" size="md" />
+        <Link href="/">
+          <GradientTitle title="Notes-taking" size="md" />
+        </Link>
       </div>
       <div className="col-start-3 flex justify-self-end">
         <CreateNewNote />
