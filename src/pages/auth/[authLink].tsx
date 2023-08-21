@@ -4,19 +4,11 @@ import { type GetStaticProps, type InferGetStaticPropsType } from "next";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import {
-  type PropsWithChildren,
-  type HTMLInputTypeAttribute,
-  type ReactNode,
-} from "react";
-import {
-  useForm,
-  type FieldErrors,
-  type SubmitHandler,
-  type UseFormRegister,
-} from "react-hook-form";
+import { type ReactNode } from "react";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { z } from "zod";
+import { InputWithLabel } from "~/components/inputWithLabel";
 import { LayoutWithTitle } from "~/components/layoutWithTitle";
 import { LinkButton } from "~/components/linkButton";
 import {
@@ -24,7 +16,6 @@ import {
   type RegistrationFormDataType,
 } from "~/types/registration";
 import { api } from "~/utils/api";
-import { HiArrowLongLeft, HiArrowLongRight } from "react-icons/hi2";
 
 const querySchema = z.union([z.literal("login"), z.literal("register")]);
 type QuerySchemaType = z.infer<typeof querySchema>;
@@ -159,12 +150,6 @@ function Register() {
             errors={errors}
           />
           <LinkButton type="submit">Submit</LinkButton>
-          {/* <button
-            type="submit"
-            className="w-full rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 sm:w-auto"
-          >
-            Submit
-          </button> */}
         </div>
       </form>
     </div>
@@ -226,46 +211,4 @@ function Login() {
       </form>
     </div>
   );
-}
-
-function InputWithLabel({
-  placeholder,
-  type,
-  register,
-  name,
-  label,
-  required,
-  errors,
-}: {
-  placeholder: string;
-  label: string;
-  name: keyof RegistrationFormDataType;
-  errors: FieldErrors<RegistrationFormDataType>;
-  register: UseFormRegister<RegistrationFormDataType>;
-  type?: HTMLInputTypeAttribute;
-  required?: boolean;
-}) {
-  const errorMessage = errors?.[name]?.message;
-  return (
-    <div className="w-full">
-      <label
-        className="mb-2 block text-sm font-medium text-gray-900"
-        htmlFor={name}
-      >
-        {label}
-      </label>
-      <input
-        type={type}
-        className="w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-blue-500 "
-        placeholder={placeholder}
-        required={required}
-        {...register(name)}
-      />
-      {Boolean(errorMessage) && <ErrorText message={errorMessage} />}
-    </div>
-  );
-}
-
-function ErrorText(props: { message?: string }) {
-  return <p className="text-xs text-red-500">{props.message}</p>;
 }
