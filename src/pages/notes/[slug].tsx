@@ -20,6 +20,7 @@ import { NoteActionButton } from "./NoteActionButton";
 import { HiOutlineArchiveBoxXMark } from "react-icons/hi2";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/router";
+import sanitizeHtml from "sanitize-html";
 
 dayjs.extend(relativeTime);
 
@@ -70,7 +71,9 @@ export default function NoteSlug(
       <div className="grow bg-white p-4">
         <div
           className="markdown"
-          dangerouslySetInnerHTML={{ __html: marked(note.content) }}
+          dangerouslySetInnerHTML={{
+            __html: sanitizeHtml(marked(note.content)),
+          }}
         />
       </div>
     </div>
