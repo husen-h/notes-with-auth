@@ -22,7 +22,7 @@ import { type NoteFormDataType, noteFormSchema } from "~/types/note";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InputWithLabel } from "~/components/inputWithLabel";
 import { LinkButton } from "~/components/linkButton";
-import { NoteActionButton } from "./NoteActionButton";
+import { NoteActionButton } from "./(NoteActionButton)";
 
 dayjs.extend(relativeTime);
 

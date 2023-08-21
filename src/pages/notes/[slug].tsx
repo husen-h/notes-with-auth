@@ -16,7 +16,7 @@ import { GradientTitle } from "~/components/layoutWithTitle";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { marked } from "marked";
-import { NoteActionButton } from "./NoteActionButton";
+import { NoteActionButton } from "./(NoteActionButton)";
 import { HiOutlineArchiveBoxXMark } from "react-icons/hi2";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/router";
@@ -62,7 +62,7 @@ export default function NoteSlug(
           {noteIsBeingDeleted ? (
             <span>Deletion in process...</span>
           ) : (
-            <NoteActionButton onClick={deleteNote}>
+            <NoteActionButton onClick={deleteNote} variant="error">
               Delete <HiOutlineArchiveBoxXMark size={20} />
             </NoteActionButton>
           )}
