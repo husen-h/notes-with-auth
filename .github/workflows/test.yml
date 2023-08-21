@@ -3,8 +3,8 @@ name: CI
 on: [push, pull_request]
 
 env:
-  DATABASE_URL: "fake"
-  NEXTAUTH_URL: "fake"
+  DATABASE_URL: "https://fake.com"
+  NEXTAUTH_URL: "https://fake.com"
   NEXTAUTH_SECRET: "fake"
   JWT_SECRET: "fake"
 
