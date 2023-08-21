@@ -3,7 +3,10 @@ name: CI
 on: [push, pull_request]
 
 env:
-  VARITABLE_TEST: "test"
+  DATABASE_URL: "fake"
+  NEXTAUTH_URL: "fake"
+  NEXTAUTH_SECRET: "fake"
+  JWT_SECRET: "fake"
 
 jobs:
   build:
